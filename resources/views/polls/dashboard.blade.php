@@ -7,6 +7,13 @@
         Sondages
     </x-slot>
 
+    <script>
+        window.__PROPS__ = {
+            polls: @json($polls),
+            username: @json(auth()->user()->username),
+        };
+    </script>
+
     <div
         id="app"
         data-props='@json([

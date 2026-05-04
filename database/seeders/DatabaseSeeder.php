@@ -165,6 +165,11 @@ class DatabaseSeeder extends Seeder
                         ['poll_id' => $i, 'label' => 'Réponse C', 'created_at' => new \DateTime('2026-04-19 10:00:00'), 'updated_at' => new \DateTime('2026-04-19 10:00:00')],
                         ['poll_id' => $i, 'label' => 'La réponse D', 'created_at' => new \DateTime('2026-04-19 10:00:00'), 'updated_at' => new \DateTime('2026-04-19 10:00:00')],
                     ]);
+
+                    // Insert votes for the poll
+                    DB::table('poll_votes')->insert([
+                        ['poll_id' => 1, 'user_id' => 1, 'poll_option_id' => 1, 'created_at' => new \DateTime('2026-04-19 10:00:00'), 'updated_at' => new \DateTime('2026-04-19 10:00:00')],
+                    ]);
                 }
             }
         );

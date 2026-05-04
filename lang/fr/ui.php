@@ -9,6 +9,7 @@ return [
         'introduction' => 'Bienvenue sur :app_name !',
         'recent_posts' => 'Posts récents',
         'see_all_posts' => 'Voir tous les posts',
+        'see_all_polls' => 'Voir tous les sondages',
     ],
     'auth' => [
         'login' => [
@@ -228,6 +229,11 @@ return [
             'description' => '":post_title" par :first_name :last_name.',
             'description_without_post_title' => 'Post de :first_name :last_name.',
             'author' => 'Publié par :first_name :last_name',
+        ],
+    ],
+    'polls' => [
+        'index' => [
+            'title' => 'Voir tous les sondages',
         ],
     ],
 ];

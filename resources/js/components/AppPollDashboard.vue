@@ -1,5 +1,5 @@
 <script setup>
-  import PollTable from './components/PollTable.vue';
+  import PollTable from './PollTable.vue';
   import { usePollStore } from '@/stores/usePollStore';
 
   const props = defineProps({

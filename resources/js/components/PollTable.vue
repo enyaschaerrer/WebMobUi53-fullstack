@@ -26,6 +26,7 @@
     </thead>
     <tbody>
       <tr v-for="poll in polls" :key="poll.id">
+        <!-- faut relier à la méthode dans le contrôlleur... -->
         <td class="border px-3 py-2"><button @click="delPoll(poll.id)">Supp.</button></td>
         <td class="border px-3 py-2">{{ poll.id }}</td>
         <td class="border px-3 py-2">{{ poll.title || '-' }}</td>
