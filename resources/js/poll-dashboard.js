@@ -3,6 +3,9 @@ import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import App from './components/AppPollDashboard.vue';
 
-const app = createApp(App, window.__PROPS__);
+const el = document.getElementById('app');
+const props = JSON.parse(el.dataset.props);
+
+const app = createApp(App, props);
 app.use(createPinia());
-app.mount('#app');
+app.mount(el);

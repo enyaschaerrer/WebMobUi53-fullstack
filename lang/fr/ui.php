@@ -233,7 +233,7 @@ return [
     ],
     'polls' => [
         'index' => [
-            'title' => 'Voir tous les sondages',
+            'title' => 'Tous les sondages',
         ],
     ],
 ];

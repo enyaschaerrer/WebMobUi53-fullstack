@@ -67,7 +67,7 @@ class ApiPollController extends Controller
             'results_public'         => 'boolean',
             'duration'               => 'nullable|integer|min:1',
             'options'                => 'required|array|min:2',
-            'options.*.text'         => 'required|string|max:255',
+            'options.*.label'         => 'required|string|max:255',
         ]);
 
         $poll = new Poll();
@@ -93,7 +93,7 @@ class ApiPollController extends Controller
 
         // Crée les options associées au sondage
         foreach ($validated['options'] as $option) {
-            $poll->options()->create(['text' => $option['text']]);
+            $poll->options()->create(['label' => $option['label']]);
         }
 
         return $poll->load('options');
@@ -116,7 +116,7 @@ class ApiPollController extends Controller
             'results_public'         => 'boolean',
             'duration'               => 'nullable|integer|min:1',
             'options'                => 'required|array|min:2',
-            'options.*.text'         => 'required|string|max:255',
+            'options.*.label'         => 'required|string|max:255',
         ]);
 
         // Si le sondage vient d'être lancé (était brouillon avant)
@@ -143,7 +143,7 @@ class ApiPollController extends Controller
         // Le load('options') recharge les options depuis la base après leur création, pour les inclure dans la réponse JSON. 
         // Sans ça, $poll->options serait vide dans la réponse.
         foreach ($validated['options'] as $option) {
-            $poll->options()->create(['text' => $option['text']]);
+            $poll->options()->create(['label' => $option['label']]);
         }
 
         return $poll->load('options');
@@ -157,7 +157,7 @@ class ApiPollController extends Controller
         $poll = Poll::where('user_id', $request->user()->id)->findOrFail($id);
         $poll->delete();
 
-        return response()->noContent();
+        return response()->json(['message' => 'success'], 200);
     }
 
     /**
