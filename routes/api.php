@@ -16,9 +16,8 @@ Route::apiResource('v1/posts', ApiPostController::class)
     ->middlewareFor(['update'], ['auth:sanctum', 'abilities:posts:update'])
     ->middlewareFor(['destroy'], ['auth:sanctum', 'abilities:posts:delete']);
 
-// Routes publiques (App 2 — vote/visualisation)
+// Routes publique (App 2 — vote/visualisation)
 Route::get('/v1/polls/{token}', [ApiPollController::class, 'show']);
-Route::post('/v1/polls/{token}/vote', [ApiPollController::class, 'vote']);
 
 // Routes protégées (App 1 — dashboard)
 Route::middleware('auth:sanctum')->group(function () {
@@ -26,4 +25,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/v1/polls', [ApiPollController::class, 'store']);
     Route::put('/v1/polls/{id}', [ApiPollController::class, 'update']);
     Route::delete('/v1/polls/{id}', [ApiPollController::class, 'remove']);
+    // Voter nécessite d'être authentifié
+    Route::post('/v1/polls/{token}/vote', [ApiPollController::class, 'vote']);
 });
