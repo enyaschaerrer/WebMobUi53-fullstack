@@ -149,7 +149,7 @@ laravel({
     input: [
         'resources/css/app.css',
         'resources/js/poll-dashboard.js',
-        'resources/js/poll-dashboard-integrated.js',
+        'resources/js/poll-vote.js',
     ],
 }),
 ```
@@ -161,6 +161,13 @@ Chaque entrypoint Vue importe `bootstrap.js` avant le montage de l'app :
 ```js
 import './bootstrap';
 import { createApp } from 'vue';
-import App from './AppPollDashboardIntegrated.vue';
-createApp(App).mount('#app');
+import { createPinia } from 'pinia';
+import App from './AppPollDashboard.vue'; // ou AppPollVote.vue
+
+const el = document.getElementById('app');
+
+// window.__PROPS__ contient les données passées depuis Blade
+createApp(App, window.__PROPS__ ?? {})
+    .use(createPinia())
+    .mount(el);
 ```
