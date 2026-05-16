@@ -3,6 +3,7 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import { useFetchApi } from '@/composables/useFetchApi';
 import { useFormatDate } from '@/composables/useFormatDate';
 import ResultsView from '@/components/ResultsView.vue';
+import { usePolling } from '@/composables/usePolling';
 
 // chemin des propriétés :
 // ces props viennent de entrypoint poll-vote.js (createApp(App, props)) qui lui-même les reçoit depuis
@@ -60,26 +61,10 @@ async function submitVote() {
     }
 }
 
-// CA JAIME PAS
+
 // Polling toutes les 5 secondes pour les résultats en temps réel
-let pollingInterval = null;
-
-function startPolling() {
-    pollingInterval = setInterval(loadPoll, 5000);
-}
-
-function stopPolling() {
-    if (pollingInterval) clearInterval(pollingInterval);
-}
-
-onMounted(async () => {
-    await loadPoll();
-    startPolling();
-});
-
-onUnmounted(() => {
-    stopPolling();
-});
+onMounted(loadPoll);
+usePolling(loadPoll, 5000);
 
 
 // Gestion choix unique / multiple
