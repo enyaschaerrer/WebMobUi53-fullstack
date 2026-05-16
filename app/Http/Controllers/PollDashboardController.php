@@ -9,7 +9,6 @@ class PollDashboardController extends Controller
     public function __invoke(Request $request)
     {
         $polls = $request->user()->polls()
-        // CA J'AI RAJOUTE WITH OPTIONS PRQ ???
             ->with('options')
             ->orderBy('created_at', 'desc')
             ->get();

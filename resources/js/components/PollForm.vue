@@ -4,9 +4,10 @@ import { ref } from 'vue';
 const props = defineProps({
   // Si poll est fourni = mode édition, sinon = mode création
   poll: { type: Object, default: null },
+  apiError: { type: String, default: null },
 });
 
-// ????
+// mécanisme de communication enfant → parent, déclaration des événements que le composant peut envoyer à son parent 
 const emit = defineEmits(['submit', 'cancel']);
 
 // Initialise le formulaire avec les valeurs du poll existant ou des valeurs vides
@@ -33,13 +34,21 @@ function removeOption(index) {
   form.value.options.splice(index, 1);
 }
 
+// pour vérifier qu'on peut pas mettre des espaces comme options/ question 
 function handleSubmit() {
-  emit('submit', { ...form.value });
+  const cleaned = {
+    ...form.value,
+    question: form.value.question.trim(),
+    options: form.value.options.map(o => ({ label: o.label.trim() })),
+  };
+  emit('submit', cleaned);
 }
+
+
 </script>
 
 <template>
-    <!-- submit.prevent ??? -->
+  <!-- = event.preventDefault() -->
   <form @submit.prevent="handleSubmit" class="space-y-4">
 
     <div>
@@ -55,13 +64,8 @@ function handleSubmit() {
     <div>
       <label class="block text-sm font-medium mb-2">Options (minimum 2) *</label>
       <div v-for="(option, index) in form.options" :key="index" class="flex gap-2 mb-2">
-        <input
-          v-model="form.options[index].label"
-          type="text"
-          required
-          :placeholder="'Option ' + (index + 1)"
-          class="flex-1 border rounded px-3 py-2"
-        />
+        <input v-model="form.options[index].label" type="text" required :placeholder="'Option ' + (index + 1)"
+          class="flex-1 border rounded px-3 py-2" />
         <button type="button" @click="removeOption(index)" class="text-red-500 px-2">✕</button>
       </div>
       <button type="button" @click="addOption" class="text-teal-600 text-sm">+ Ajouter une option</button>
@@ -76,10 +80,10 @@ function handleSubmit() {
         <input type="checkbox" v-model="form.allow_multiple_choices" />
         Choix multiple
       </label>
-      <label class="flex items-center gap-2">
+      <!-- <label class="flex items-center gap-2">
         <input type="checkbox" v-model="form.allow_vote_change" />
         Permettre de changer son vote
-      </label>
+      </label> -->
       <label class="flex items-center gap-2">
         <input type="checkbox" v-model="form.results_public" />
         Résultats publics
@@ -87,10 +91,19 @@ function handleSubmit() {
     </div>
 
     <div>
-        <!-- en secondes ??? -->
-      <label class="block text-sm font-medium">Durée (en secondes, optionnel)</label>
-      <input v-model.number="form.duration" type="number" min="1" class="mt-1 w-full border rounded px-3 py-2" />
+      <label class="block text-sm font-medium">Durée (optionnel)</label>
+      <select v-model.number="form.duration" class="mt-1 w-full border rounded px-3 py-2">
+        <option :value="null">Sans limite</option>
+        <option :value="300">5 minutes</option>
+        <option :value="3600">1 heure</option>
+        <option :value="86400">1 jour</option>
+        <option :value="604800">1 semaine</option>
+      </select>
     </div>
+
+    <p v-if="apiError" class="text-red-500 text-sm p-3 bg-red-50 dark:bg-red-900/20 rounded">
+      {{ apiError }}
+    </p>
 
     <div class="flex gap-2 pt-2">
       <button type="submit" class="px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700">

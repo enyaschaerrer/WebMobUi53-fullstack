@@ -87,6 +87,7 @@ Les pages Blade hébergeant les SPA Vue sont dans le groupe `auth` de `routes/we
 
 ---
 
+
 ## Plusieurs apps Vue dans un même layout Blade
 
 ### Slot `scripts` dans le layout
@@ -99,46 +100,31 @@ Le layout `default-layout.blade.php` expose un slot optionnel `scripts` dans le 
 @endisset
 ```
 
-Chaque page Blade qui embarque une app Vue y injecte son entrypoint Vite via ce slot :
+
+### Architecture frontend
+
+Les deux apps Vue sont intégrées dans le layout Laravel standard (`default-layout.blade.php`), qui inclut le header et le footer du site. Chaque page Blade injecte son entrypoint Vite via le slot `scripts` dans le `<head>` :
 
 ```blade
 <x-default-layout>
     <x-slot:scripts>
-        @vite(['resources/js/poll-dashboard-integrated.js'])
+        @vite(['resources/js/poll-dashboard.js'])
     </x-slot>
+
+    <script>
+        window.__PROPS__ = {
+            polls: @json($polls),
+            username: @json(auth()->user()->username),
+        };
+    </script>
 
     <div id="app"></div>
 </x-default-layout>
 ```
-
 Ainsi chaque page charge uniquement son propre bundle JS — pas de JS chargé globalement pour toutes les pages.
 
-### Layout standalone minimal
+Les données Laravel sont passées à Vue via `window.__PROPS__` plutôt que via un attribut `data-props` HTML, pour éviter les problèmes d'échappement JSON avec les caractères spéciaux.
 
-Pour une app Vue qui ne doit pas embarquer le header/footer Laravel, un layout dédié
-`vue-app-layout.blade.php` est disponible. Il conserve uniquement :
-- les métadonnées HTML (`title`, `description`, `viewport`)
-- le CSS global via `@vite(['resources/css/app.css'])`
-- le slot `scripts` pour injecter l'entrypoint Vite de la page
-
-Exemple :
-
-```blade
-<x-vue-app-layout>
-    <x-slot:title>
-        Mon app Vue
-    </x-slot>
-
-    <x-slot:scripts>
-        @vite(['resources/js/mon-app.js'])
-    </x-slot>
-
-    <div id="app"></div>
-</x-vue-app-layout>
-```
-
-Le composant n'ajoute ni conteneur, ni navigation, ni footer, pour laisser l'app Vue
-piloter entièrement sa mise en page.
 
 ### `vite.config.js`
 
@@ -149,7 +135,7 @@ laravel({
     input: [
         'resources/css/app.css',
         'resources/js/poll-dashboard.js',
-        'resources/js/poll-dashboard-integrated.js',
+        'resources/js/poll-vote.js',
     ],
 }),
 ```
@@ -161,6 +147,32 @@ Chaque entrypoint Vue importe `bootstrap.js` avant le montage de l'app :
 ```js
 import './bootstrap';
 import { createApp } from 'vue';
-import App from './AppPollDashboardIntegrated.vue';
-createApp(App).mount('#app');
+import App from './AppPollDashboard.vue'; // ou AppPollVote.vue
+
+const el = document.getElementById('app');
+
+// window.__PROPS__ contient les données passées depuis Blade
+createApp(App, window.__PROPS__ ?? {})
+    .mount(el);
 ```
+
+## Fonctionnalités
+
+### Dashboard (`/polls/dashboard`)
+- Créer, modifier, supprimer des sondages
+- Configurer les options et paramètres (brouillon, choix multiple, résultats publics, durée)
+- Copier le lien de partage via token
+
+### Page de vote (`/polls/{token}`)
+- Accessible sans login
+- Vote si connecté
+- Résultats en temps réel (polling toutes les 5 secondes)
+- Graphique des résultats
+- Accès anonyme aux résultats si publics
+
+## Choix techniques
+
+- **2 apps Vue.js séparées** : dashboard (auth requise) et vote (publique)
+- **Authentification** : cookie de session Laravel via Sanctum
+- **Props Blade → Vue** : passées via `window.__PROPS__` pour éviter les problèmes d'échappement JSON
+- **Store Pinia** : gestion de l'état des sondages partagé entre composants

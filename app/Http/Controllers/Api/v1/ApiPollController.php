@@ -16,9 +16,7 @@ class ApiPollController extends Controller
     {
         $polls = $request->user()
             ->polls()
-            ->with(['options' => function ($query) {
-                $query->withCount('votes');
-            }])
+            ->with('options')
             ->orderBy('created_at', 'desc')
             ->get();
 

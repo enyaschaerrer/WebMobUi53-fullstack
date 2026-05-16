@@ -167,5 +167,11 @@ return [
         'scopes'          => 'permissions',
         'title'           => 'titre',
         'username'        => 'nom d\'utilisateur',
+        'question'               => 'question',
+        'options'                => 'options',
+        'options.*.label'        => 'option',
+        'duration'               => 'durée',
+        'allow_multiple_choices' => 'choix multiple',
+        'results_public'         => 'résultats publics',
     ],
 ];

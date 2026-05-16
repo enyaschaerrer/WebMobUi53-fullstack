@@ -17,7 +17,7 @@ export function usePollStore() {
         polls.value = polls.value.filter(p => p.id !== id);
       }
     } catch (err) {
-      console.log(err)
+      return err.data?.message ?? 'Une erreur est survenue.';
     }
   }
 
@@ -27,7 +27,7 @@ export function usePollStore() {
       // ajoute en tête de liste
       polls.value.unshift(result);
     } catch (err) {
-      console.error(err);
+      return err.data?.message ?? 'Une erreur est survenue.';
     }
   }
 
@@ -38,7 +38,7 @@ export function usePollStore() {
       const index = polls.value.findIndex(p => p.id === id);
       if (index >= 0 && index <= polls.value.length) polls.value[index] = result;
     } catch (err) {
-      console.log(err)
+      return err.data?.message ?? 'Une erreur est survenue.';
     }
   }
 

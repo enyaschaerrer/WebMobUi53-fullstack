@@ -10,6 +10,7 @@ const { polls, deletePoll, createPoll, editPoll } = usePollStore();
 // false = on voit le tableau, true = on voit le formulaire
 const showForm = ref(false);
 const pollToEdit = ref(null);
+const formError = ref(null);
 
 function openCreate() {
   pollToEdit.value = null;  // pas de poll = mode création
@@ -27,10 +28,19 @@ function closeForm() {
 }
 
 async function handleSubmit(infos) {
+  formError.value = null;
   if (pollToEdit.value) {
-    await editPoll(pollToEdit.value.id, infos);
+    const error = await editPoll(pollToEdit.value.id, infos);
+    if (error) {
+      formError.value = error;
+      return;
+    }
   } else {
-    await createPoll(infos);
+    const error = await createPoll(infos);
+    if (error) {
+      formError.value = error;
+      return;
+    }
   }
   closeForm();
 }
@@ -53,7 +63,10 @@ async function copyLink(poll) {
 <template>
   <!-- FORMULAIRE : visible si showForm est true -->
   <div v-if="showForm">
-    <PollForm :poll="pollToEdit" @submit="handleSubmit" @cancel="closeForm" />
+    <!-- passage d'une prop 
+     :apiError = le nom de la prop déclarée dans PollForm avec defineProps
+      formError = la variable ref dans PollTable qui contient le message d'erreur -->
+    <PollForm :poll="pollToEdit" :apiError="formError" @submit="handleSubmit" @cancel="closeForm" />
   </div>
 
   <!-- TABLEAU : visible si showForm est false -->
@@ -85,6 +98,15 @@ async function copyLink(poll) {
           <div class="text-xs text-gray-500 mb-3 space-y-1">
             <p>Début : {{ formatDate(poll.started_at) }}</p>
             <p>Fin : {{ formatDate(poll.ends_at) }}</p>
+            <p>Options : {{ poll.options?.length ?? '-' }}</p>
+            <div class="flex gap-2 flex-wrap mt-1">
+              <span v-if="poll.allow_multiple_choices" class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                Choix multiple
+              </span>
+              <span v-if="poll.results_public" class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                Résultats publics
+              </span>
+            </div>
           </div>
 
           <div class="flex flex-wrap gap-2">
