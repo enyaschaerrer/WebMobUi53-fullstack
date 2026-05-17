@@ -80,10 +80,6 @@ function handleSubmit() {
         <input type="checkbox" v-model="form.allow_multiple_choices" />
         Choix multiple
       </label>
-      <!-- <label class="flex items-center gap-2">
-        <input type="checkbox" v-model="form.allow_vote_change" />
-        Permettre de changer son vote
-      </label> -->
       <label class="flex items-center gap-2">
         <input type="checkbox" v-model="form.results_public" />
         Résultats publics
