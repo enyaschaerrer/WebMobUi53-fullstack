@@ -57,7 +57,7 @@ onMounted(renderChart);
 
 <template>
     <!-- Graphique -->
-    <div class="max-w-m mx-auto mb-6">
+    <div class="max-w-sm mb-6">
       <canvas ref="canvas"></canvas>
     </div>
 </template>
