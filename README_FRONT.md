@@ -175,4 +175,4 @@ createApp(App, window.__PROPS__ ?? {})
 - **2 apps Vue.js séparées** : dashboard (auth requise) et vote (publique)
 - **Authentification** : cookie de session Laravel via Sanctum
 - **Props Blade → Vue** : passées via `window.__PROPS__` pour éviter les problèmes d'échappement JSON
-- **Store Pinia** : gestion de l'état des sondages partagé entre composants
+- **Store** : l'état des sondages est géré par un store Vue (usePollStore) reposant sur un ref, partagé entre les composants — sans librairie externe.
