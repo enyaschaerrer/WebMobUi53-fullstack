@@ -26,7 +26,7 @@ const form = ref({
 });
 
 function addOption() {
-  form.value.options.push({ text: '' });
+  form.value.options.push({ label: '' });
 }
 
 function removeOption(index) {
