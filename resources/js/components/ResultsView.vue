@@ -9,7 +9,6 @@ const props = defineProps({
   poll: { type: Object, required: true },
 });
 
-
 // référence vers élément canvas du DOM.  
 // grâce à ref="canvas" dans le template, Vue y met auto l'élément <canvas> du DOM après le montage.
 const canvas = ref(null);

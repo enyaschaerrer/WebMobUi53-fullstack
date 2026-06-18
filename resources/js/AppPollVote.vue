@@ -1,14 +1,14 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useFetchApi } from '@/composables/useFetchApi';
 import { useFormatDate } from '@/composables/useFormatDate';
 import ResultsView from '@/components/ResultsView.vue';
 import { usePolling } from '@/composables/usePolling';
 
 // chemin des propriétés :
-// ces props viennent de entrypoint poll-vote.js (createApp(App, props)) qui lui-même les reçoit depuis
-// Blade (data-props='@json(["token" => $token, "loginUrl" => route("login")])')
-// donc, Blade → data-props → entrypoint JS → createApp(App, props) → defineProps dans le composant
+// ces props viennent de l'entrypoint poll-vote.js (createApp(App, props)) qui lui-même les reçoit depuis
+// Blade (window.__PROPS__= {...})
+// donc, Blade → window props → entrypoint JS → createApp(App, props) → defineProps dans le composant
 const props = defineProps({
     token: { type: String, required: true },
     loginUrl: { type: String, default: null },
@@ -19,7 +19,10 @@ const { fetchApi } = useFetchApi();
 const { formatDate } = useFormatDate();
 
 const poll = ref(null);
+
+// booléen indiquant si on est en train de charger le sondage
 const loading = ref(true);
+
 const error = ref(null);
 
 // Pour le vote
@@ -54,17 +57,17 @@ async function submitVote() {
         await loadPoll(); // recharge pour afficher les résultats
     } catch (err) {
         // le msg d'erreur est dans data car useFetchApi rejette erreurs sous cette forme : 
-        // reject({ status: response.status, statusText: response.statusText, data });
+        // {status: response.status, statusText: response.statusText, data });
         // le ? protège contre le cas où err.data est null ou undefined.
-        // si c'est undefined -> 'Erreur lors du chargement'
+        // si c'est undefined -> 'Erreur lors du vote.'
         voteError.value = err.data?.message ?? 'Erreur lors du vote.';
     }
 }
 
 
 // Polling toutes les 5 secondes pour les résultats en temps réel
-onMounted(loadPoll);
-usePolling(loadPoll, 5000);
+onMounted(loadPoll); // charge UNE fois, dès que le composant (celui-ci, AppPollVote) est monté
+usePolling(loadPoll, 5000); // recharge toutes les 5 s ensuite
 
 
 // Gestion choix unique / multiple
@@ -75,11 +78,11 @@ function toggleOption(optionId) {
     } else {
         // Choix multiple : toggle
         const index = selectedOptions.value.indexOf(optionId);
-        // indexOf retourne -1 si élément existe pas dans le tableau
-        // donc si option n'est pas encore dans la sélection, donc pas trouvé dans le tableau
-        // on l'ajoute. sinon on la retire avec splice()
+        // indexOf retourne -1 si élément n'existe pas dans le tableau
+        // donc si l'option n'est pas encore dans la sélection, on l'ajoute. 
         if (index === -1) {
             selectedOptions.value.push(optionId);
+        // sinon on la retire avec splice()
         } else {
             // splice(index, 1) -> cible index fourni et 1 indique qu'il supprime exactement un élément à cet emplacement 
             // donc supprime l'option avec l'index passé en paramètres
@@ -88,12 +91,7 @@ function toggleOption(optionId) {
     }
 }
 
-// Calcule le pourcentage d'une option
-function percentage(option) {
-    const total = poll.value.options.reduce((sum, o) => sum + o.votes_count, 0);
-    if (total === 0) return 0;
-    return Math.round((option.votes_count / total) * 100);
-}
+
 </script>
 
 <template>
@@ -121,7 +119,7 @@ function percentage(option) {
 
             <!-- Sondage fermé -> résultats uniquement -->
             <!-- variable poll.is_open vient du backend (ApiPollController) dans show()
-            pas une colonne en bdd, elle est ajouté par Laravel avant de retourner objet -->
+            c'est pas une colonne en bdd, elle est ajoutée par Laravel avant de retourner l'objet -->
             <div v-if="!poll.is_open || poll.is_draft">
                 <p v-if="!poll.is_open" class="mb-4 p-3 bg-red-100 text-red-700 rounded">
                     Ce sondage est terminé.

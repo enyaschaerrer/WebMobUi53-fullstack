@@ -1,6 +1,7 @@
 import { ref } from 'vue';
 import { useFetchApi } from '@/composables/useFetchApi';
 
+// déclaré en dehors de la fonction comme ça c'est un singleton. créé seulement 1x
 const polls = ref([]);
 
 export function usePollStore() {
@@ -9,6 +10,8 @@ export function usePollStore() {
   function setPolls(data) {
     polls.value = data;
   }
+
+  // les 3 fonctions renvoient undefined si OK, ou un message d'erreur si l'API échoue (récupéré par PollTable)
 
   async function deletePoll(id) {
     try {
@@ -36,7 +39,7 @@ export function usePollStore() {
       const result = await fetchApi({ url: 'polls/' + id, method: 'PUT', data: params });
       // remplace le poll modifié dans la liste
       const index = polls.value.findIndex(p => p.id === id);
-      if (index >= 0 && index <= polls.value.length) polls.value[index] = result;
+      if (index !== -1) polls.value[index] = result;
     } catch (err) {
       return err.data?.message ?? 'Une erreur est survenue.';
     }

@@ -40,6 +40,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
 });
 
+// pas protégée par le middleware auth
 Route::get('/polls/{token}', function ($token) {
     return view('polls.vote', ['token' => $token]);
 });

@@ -13,5 +13,6 @@ export function usePolling(fn, interval = 5000) {
     timer = setInterval(fn, interval);
   });
 
+  // quand on quitte la page (composant démonté), on stoppe l'intervalle.
   onUnmounted(() => clearInterval(timer));
 }
