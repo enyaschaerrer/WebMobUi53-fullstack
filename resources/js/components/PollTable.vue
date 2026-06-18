@@ -4,55 +4,73 @@ import PollForm from './PollForm.vue';
 import { usePollStore } from '@/stores/usePollStore';
 import { useFormatDate } from '@/composables/useFormatDate';
 
+// on déstructure l'objet que les fonctions (composables) renvoient pour extraire ce qui nous intéresse (fonctions ou variables)
 const { formatDate, formatDateShort } = useFormatDate();
 const { polls, deletePoll, createPoll, editPoll } = usePollStore();
 
-// false = on voit le tableau, true = on voit le formulaire
+// booléen réactif qui pilote l'affichage via v-if/else du template. local, que dans PollTable
+// false = tableau visible, true = formulaire visible
 const showForm = ref(false);
+
+// là où on va stocker le formulaire qu'on va modifier. 
+// null = mode création, un sondage = mode édition
 const pollToEdit = ref(null);
+
+// erreur liée au formulaire
 const formError = ref(null);
 
+// stocke l'id du poll dont le lien vient d'être copié
+const copied = ref(null); 
+
+// on ouvre le mode création, donc le PollForm
+// on prépare donnée puis on affiche
 function openCreate() {
-  pollToEdit.value = null;  // pas de poll = mode création
-  showForm.value = true;
+  pollToEdit.value = null;  // pas de poll = mode création.
+  showForm.value = true; // on affiche le formulaire
 }
 
+// on prépare donnée puis on affiche
 function openEdit(poll) {
-  pollToEdit.value = poll;  // poll fourni = mode édition
-  showForm.value = true;
+  pollToEdit.value = poll; // on mémorise LE sondage à modifier → mode ÉDITION
+  showForm.value = true; // on affiche le formulaire
 }
 
 function closeForm() {
-  showForm.value = false;
-  pollToEdit.value = null;
+  showForm.value = false; // on cache le formulaire → retour au tableau
+  pollToEdit.value = null; // on nettoie (plus de sondage en cours d'édition)
 }
 
+// gestionnaire de l'événement submit émis par PollForm (quand un PollForm est soumis)
 async function handleSubmit(infos) {
+  // 1. reset erreur
   formError.value = null;
+  // 2. appelle editPoll() ou createPoll() selon pollToEdit
   if (pollToEdit.value) {
     const error = await editPoll(pollToEdit.value.id, infos);
+    // 3. si erreur, l'affiche et s'arrête
     if (error) {
       formError.value = error;
       return;
     }
   } else {
     const error = await createPoll(infos);
+    // 3. si erreur, l'affiche et s'arrête
     if (error) {
       formError.value = error;
       return;
     }
   }
+  // si pas d'erreur, ferme le formulaire
   closeForm();
 }
 
-async function delPoll(id) {
-  await deletePoll(id);
-}
-
-const copied = ref(null); // stocke l'id du poll dont le lien vient d'être copié
 
 async function copyLink(poll) {
+  // window.location.origin = le début de l'URL
   const url = `${window.location.origin}/polls/${poll.secret_token}`;
+  // API navigateur du presse-papier : copie l'URL dans le presse-papier du système (comme un Ctrl+C). 
+  // asynchrone
+  // copied.value = poll.id déclenche l'affichage « ✓ Copié ! » car réactif, remis à null après 2 s par le setTimeout
   await navigator.clipboard.writeText(url);
   copied.value = poll.id;
   setTimeout(() => copied.value = null, 2000); // remet à null après 2 secondes
@@ -114,7 +132,7 @@ async function copyLink(poll) {
               class="bg-teal-600 dark:bg-purple-900 text-white px-3 py-1 rounded-md hover:bg-teal-700 transition text-sm">
               Modifier
             </button>
-            <button @click="delPoll(poll.id)"
+            <button @click="deletePoll(poll.id)"
               class="bg-red-600 text-white px-3 py-1 rounded-md hover:bg-red-700 transition text-sm">
               Supprimer
             </button>

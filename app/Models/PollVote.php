@@ -24,7 +24,7 @@ class PollVote extends Model
     }
 
     /**
-     * Get the option chosen.
+     * Get the option chosen. s'il vote plusieurs fois, ça créera plusieurs lignes dans la bdd
      */
     public function option(): BelongsTo
     {

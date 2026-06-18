@@ -1,6 +1,8 @@
 <script setup>
 import { ref } from 'vue';
 
+// les propriétés passées par le parent (PollTable) depuis son état local :
+// poll <- pollToEdit (null = création, sinon le sondage à éditer) ; apiError <- formError (message d'erreur API)
 const props = defineProps({
   // Si poll est fourni = mode édition, sinon = mode création
   poll: { type: Object, default: null },
@@ -11,12 +13,15 @@ const props = defineProps({
 const emit = defineEmits(['submit', 'cancel']);
 
 // Initialise le formulaire avec les valeurs du poll existant ou des valeurs vides
+// le premier ? veut dire si props.poll est null, n'essaie pas de lire .title, renvoie undefined au lieu de planter 
+// les deuxièmes ?? fait prendre une valeur par défaut '' si null ou undefined
 const form = ref({
   title: props.poll?.title ?? '',
   question: props.poll?.question ?? '',
   is_draft: props.poll?.is_draft ?? true,
   allow_multiple_choices: props.poll?.allow_multiple_choices ?? false,
-  allow_vote_change: props.poll?.allow_vote_change ?? false,
+  // mis en comm car cette fonctionnalité pas implémentée
+  // allow_vote_change: props.poll?.allow_vote_change ?? false,
   results_public: props.poll?.results_public ?? false,
   duration: props.poll?.duration ?? null,
   options: props.poll?.options?.map(o => ({ label: o.label })) ?? [
@@ -34,13 +39,15 @@ function removeOption(index) {
   form.value.options.splice(index, 1);
 }
 
-// pour vérifier qu'on peut pas mettre des espaces comme options/ question 
+// trim() nettoie (enlève espaces au début et fin). donc si qqn rentre des espaces, 
+// ça devient "" et ça passera pas (dans options/ question)
 function handleSubmit() {
   const cleaned = {
     ...form.value,
     question: form.value.question.trim(),
     options: form.value.options.map(o => ({ label: o.label.trim() })),
   };
+  // événement qui remonte au parent (PollTable), que celui-ci peut traiter
   emit('submit', cleaned);
 }
 
@@ -53,6 +60,7 @@ function handleSubmit() {
 
     <div>
       <label class="block text-sm font-medium">Titre (optionnel)</label>
+      <!-- le v-model lie l'input au champ title de la variable réactive form -->
       <input v-model="form.title" type="text" class="mt-1 w-full border rounded px-3 py-2" />
     </div>
 
@@ -88,7 +96,9 @@ function handleSubmit() {
 
     <div>
       <label class="block text-sm font-medium">Durée (optionnel)</label>
+      <!-- v-model.number convertit valeur du select en nombre (sinon arrive en string) -->
       <select v-model.number="form.duration" class="mt-1 w-full border rounded px-3 py-2">
+        <!-- stocké en secondes dans bdd -->
         <option :value="null">Sans limite</option>
         <option :value="300">5 minutes</option>
         <option :value="3600">1 heure</option>

@@ -17,7 +17,7 @@ class Poll extends Model
     }
 
     /**
-     * Get the options for the poll.
+     * Get the options for the poll. (min. 2)
      */
     public function options(): HasMany
     {
