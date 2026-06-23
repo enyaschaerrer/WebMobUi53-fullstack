@@ -32,6 +32,7 @@ Route::controller(AuthController::class)->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
+    // ->name('polls.dashboard') donne un nom à la route (pratique pour générer l'URL ailleurs avec route('polls.dashboard'))
     Route::get('/polls/dashboard', PollDashboardController::class)->name('polls.dashboard');
     Route::resource('posts', PostController::class)->except(['index', 'show']);
     Route::singleton('my-profile', MyProfileController::class)->destroyable();
@@ -40,7 +41,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
 });
 
-// pas protégée par le middleware auth
+// pas protégée par le middleware auth -> publique
 Route::get('/polls/{token}', function ($token) {
     return view('polls.vote', ['token' => $token]);
 });

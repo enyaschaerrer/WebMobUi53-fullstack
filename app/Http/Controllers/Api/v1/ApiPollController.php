@@ -188,7 +188,7 @@ class ApiPollController extends Controller
             return response()->json(['message' => 'Ce sondage est terminé.'], 403);
         }
 
-        // min une option choisie ?
+        // min une option choisie 
         $validated = $request->validate([
             'option_ids'   => 'required|array|min:1',
             // pour chaque élément du tab option_ids, il doit être un entier
